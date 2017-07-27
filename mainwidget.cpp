@@ -11,10 +11,11 @@
 #include <QProgressBar>
 #include <QMessageBox>
 #include <QLayoutItem>
+#include <Qlabel>
 #include <math.h>
 
-void MainWidget::ZoomIn( const QPoint &p )  {
-    QPointF pF = GraphCoord( p );
+void MainWidget::ZoomIn(const QPoint &p)  {
+    QPointF pF = pixelCoordsToGraphCoords( p );
     double x = pF.x();
     double y = pF.y();
     xOrigin = x - ( x - xOrigin ) / zoomStep;
@@ -23,29 +24,29 @@ void MainWidget::ZoomIn( const QPoint &p )  {
     BuildMandelbrot();
 }
 
-QPointF MainWidget::GraphCoord( const QPoint &p ) {
-    double viewSize = ( 1 / zoomFactor ) * 4; //lățimea absolută a zonei ilustrate din fractal
-    double xRatio = ( (double)( p.x() ) / 600 );
-    double yRatio = ( (double)( p.y() ) / 600 );
+QPointF MainWidget::pixelCoordsToGraphCoords(const QPoint &p)
+{
+    double viewSize = (1 / zoomFactor) * 4;
+    double xRatio = (double)p.x() / 600;
+    double yRatio = (double)p.y() / 600;
     QPointF pF;
-    pF.setX( xOrigin - viewSize / 2 + viewSize * xRatio );
-    pF.setY(  ( yOrigin - viewSize / 2 + viewSize * yRatio ) );
+    pF.setX(xOrigin - viewSize / 2 + viewSize * xRatio);
+    pF.setY(yOrigin - viewSize / 2 + viewSize * yRatio);
 
     return pF;
 }
 
-bool MainWidget::eventFilter( QObject *obj, QEvent *event ) //filtrul de evenimente, efectuează instrucțiunile corespunzătoare pentru click-uri pe imagine și apăsarea anumitor taste
+bool MainWidget::eventFilter(QObject *obj, QEvent *event)
 {
-    imgLabel -> setFocus();
-    //qDebug() << "orice eveniment";
-    if ( obj == this -> imgLabel )  //qDebug() << " numai cele adresate imgLabel";
-    {
-        if ( event -> type() == QEvent::KeyPress )
-        {
-            //qDebug() << "daca e un eveniment de la tastatura";
-            QKeyEvent* ev = static_cast<QKeyEvent*>( event );
+    imgLabel -> setFocus(); //TODO: fix crash here
 
-            if ( ev -> key() == Qt::Key_Left )
+    if(obj == this -> imgLabel)
+    {
+        if(event -> type() == QEvent::KeyPress)
+        {
+            QKeyEvent* ev = static_cast<QKeyEvent*>(event);
+
+            if (ev -> key() == Qt::Key_Left)
             {
                 double step = 1 / zoomFactor;
                 if ( ev -> modifiers() & Qt::ShiftModifier )
@@ -54,62 +55,64 @@ bool MainWidget::eventFilter( QObject *obj, QEvent *event ) //filtrul de evenime
                 BuildMandelbrot();
                 return true;
             }
-            if ( ev -> key() == Qt::Key_Right )
+            if(ev -> key() == Qt::Key_Right)
             {
                 double step = 1 / zoomFactor;
-                if ( ev -> modifiers() & Qt::ShiftModifier )
+                if (ev -> modifiers() & Qt::ShiftModifier)
                     step /= 10;
                 xOrigin += step;
                 BuildMandelbrot();
                 return true;
             }
-            if ( ev -> key() == Qt::Key_Up )
+            if( ev -> key() == Qt::Key_Up)
             {
                 double step = 1 / zoomFactor;
-                if ( ev -> modifiers() & Qt::ShiftModifier )
+                if(ev -> modifiers() & Qt::ShiftModifier)
                     step /= 10;
                 yOrigin -= step;
                 BuildMandelbrot();
                 return true;
             }
-            if ( ev -> key() == Qt::Key_Down )
+            if(ev -> key() == Qt::Key_Down)
             {
                 double step = 1 / zoomFactor;
-                if ( ev -> modifiers() & Qt::ShiftModifier )
+                if(ev -> modifiers() & Qt::ShiftModifier)
                     step /= 10;
                 yOrigin += step;
                 BuildMandelbrot();
                 return true;
             }
-            if ( ev -> key() == Qt::Key_Minus )
+            if(ev -> key() == Qt::Key_Minus)
             {
-                if( ev -> modifiers() & Qt::ControlModifier )
+                if(ev -> modifiers() & Qt::ControlModifier)
                 {
-                    if ( maxIterations > 100 )
+                    if(maxIterations > 100)
                         maxIterations -= 100;
                 }
                 else
                 {
-                    if ( ev -> modifiers() & Qt::ShiftModifier )
+                    if(ev -> modifiers() & Qt::ShiftModifier)
                     {
-                        if ( maxIterations > 1 )
+                        if (maxIterations > 1)
                             maxIterations --;
                     }
                     else
-                        if ( maxIterations > 10 )
+                    {
+                        if (maxIterations > 10)
                             maxIterations -= 10;
+                    }
                 }
                 BuildMandelbrot();
                 return true;
             }
 
-            if ( ev -> key() == Qt::Key_Plus )
+            if(ev -> key() == Qt::Key_Plus)
             {
-                if ( ev -> modifiers() & Qt::ControlModifier )
+                if(ev -> modifiers() & Qt::ControlModifier)
                      maxIterations += 100;
                 else
                 {
-                    if ( ev -> modifiers() & Qt::ShiftModifier )
+                    if(ev -> modifiers() & Qt::ShiftModifier)
                         maxIterations ++;
                     else
                         maxIterations += 10;
@@ -118,18 +121,18 @@ bool MainWidget::eventFilter( QObject *obj, QEvent *event ) //filtrul de evenime
                 return true;
             }
         }
-        //dacă e de la mouse
-        if ( event -> type() == QEvent::MouseButtonRelease )
+
+        if(event -> type() == QEvent::MouseButtonRelease)
         {
-            if ( isEnabled() ) //dacă fereastra e activă ( aparent doar partea asta merge și când e inactivă )
+            if(isEnabled())
             {
-                QMouseEvent* ev = static_cast<QMouseEvent*>( event );
-                if ( ev -> button() == Qt::LeftButton )
+                QMouseEvent* ev = static_cast<QMouseEvent*>(event);
+                if(ev -> button() == Qt::LeftButton)
                 {
-                    ZoomIn( ev -> pos() );
+                    ZoomIn(ev -> pos());
                     return true;
                 }
-                if ( ev -> button() == Qt::RightButton )
+                if(ev -> button() == Qt::RightButton)
                 {
                     ZoomOut();
                     return true;
@@ -137,142 +140,140 @@ bool MainWidget::eventFilter( QObject *obj, QEvent *event ) //filtrul de evenime
             }
         }
     }
-    return false; //propagă semnalul mai departe
+
+    return false;
 }
 
-void MainWidget::UpdatePixmap() //QImage are funcții de editare directă pe pixeli și QPixmap e folosită cu QLabel pentru afișare deci ultimul pas la generarea unui fractal este convertirea din QImage în QPixmap și asocierea acestuia la label-ul folosit pentru afișare
+void MainWidget::UpdatePixmap()
 {
-    imgLabel -> setPixmap( QPixmap::fromImage( *image ) );
+    imgLabel -> setPixmap(QPixmap::fromImage(*image));
 }
 
-void MainWidget::UpdateInfoLabel()  //afișarea pe fereastră a nivelului de zoom și a numărului de iterații
+void MainWidget::UpdateInfoLabel()
 {
     QString infoString;
-    infoString.append( "Zoom: " );
-    infoString.append( QString::number( zoomFactor ) );
-    infoString.append( ". " );
-    infoString.append( QString::number( maxIterations ) );
-    infoString.append( " Iterations." );
-    infoLabel -> setText( infoString );
+    infoString.append("Zoom: ");
+    infoString.append(QString::number(zoomFactor));
+    infoString.append(". ");
+    infoString.append(QString::number(maxIterations));
+    infoString.append(" Iterations.");
+    zoomInfoLabel -> setText(infoString);
 
     infoString.clear();
-    infoString.append( "X = " );
-    infoString.append( QString::number( xOrigin ) );
-    infoString.append( ". Y = " );
-    infoString.append( QString::number( - yOrigin ) );
-    infoString.append( "." );
-    infoLabel2 -> setText( infoString );
+    infoString.append("X = ");
+    infoString.append(QString::number(xOrigin));
+    infoString.append(". Y = ");
+    infoString.append(QString::number(-yOrigin));
+    infoString.append(".");
+    posInfoLabel -> setText(infoString);
 }
 
-void MainWidget::BuildUi() //creearea interfeței
+void MainWidget::BuildUi()
 {
-    //alocarea obiectelor pentru elemente de interfață
-    infoLabel = new QLabel( this );
-    infoLabel2 = new QLabel( this );
-    pushReset = new QPushButton( this );
-    pushOptions = new QPushButton( this );
-    progBar = new QProgressBar( this );
-    image = new QImage( 600, 600, QImage::Format_RGB32 );   //imaginea în care se creează fractalul
-    imgLabel = new MyLabel;
-    vbLay = new QVBoxLayout( this );
-    hbLay = new QHBoxLayout( this );
-    
-    //configurarea obiectelor
-    imgLabel -> setPixmap( QPixmap::fromImage( *image ) );  //soluția folosită în qt pentru a afișa imagini în fereastră
-    pushReset -> setText( "Reset" );
-    pushReset -> setFixedWidth( 100 );
-    pushOptions -> setText( "Options and Instructions" );
-    pushOptions -> setFixedWidth( 150 );
-    progBar -> setRange( 0, 599 );
-    progBar -> setTextVisible( false );
-    progBar -> setFixedWidth( 600 );
-    
-    //construirea și setarea layout-urilor
-    hbLay -> addStretch();
-    hbLay -> addWidget( pushOptions );
-    hbLay -> addWidget( pushReset );
-    hbLay -> addStretch();
+    mainVbLay       = new QVBoxLayout(this);
+    zoomInfoLabel   = new QLabel(this);
+    posInfoLabel    = new QLabel(this);
+    buttonsHbLay    = new QHBoxLayout();
+    pushReset       = new QPushButton(this);
+    pushOptions     = new QPushButton(this);
+    imgLabel        = new QLabel(this);
+    image           = new QImage(600, 600, QImage::Format_RGB32);
+    progBar         = new QProgressBar(this);
 
-    vbLay -> addWidget( infoLabel, 0, Qt::AlignCenter );
-    vbLay -> addWidget( infoLabel2, 0, Qt::AlignCenter );
-    vbLay -> addLayout( hbLay );
-    vbLay -> addWidget( imgLabel, 0, Qt::AlignCenter );
-    vbLay -> addWidget( progBar, 0, Qt::AlignCenter );
-    vbLay -> addStretch();
-    vbLay -> setSizeConstraint( QLayout::SetFixedSize );
-    setLayout( vbLay );
+    imgLabel    -> setPixmap(QPixmap::fromImage(*image));
+    pushReset   -> setText("Reset");
+    pushReset   -> setFixedWidth(100);
+    pushOptions -> setText("Options and Instructions");
+    pushOptions -> setFixedWidth(150);
+    progBar     -> setRange(0, 599);
+    progBar     -> setTextVisible(false);
+    progBar     -> setFixedWidth(600);
+    
+    buttonsHbLay -> addStretch();
+    buttonsHbLay -> addWidget(pushOptions);
+    buttonsHbLay -> addWidget(pushReset);
+    buttonsHbLay -> addStretch();
 
-    setWindowFlags( windowFlags() ^ Qt::WindowMaximizeButtonHint ); //dezactivează butonul de maximise fereastra fiind de dimensiune fixă
+    mainVbLay -> addWidget(zoomInfoLabel, 0, Qt::AlignCenter);
+    mainVbLay -> addWidget(posInfoLabel, 0, Qt::AlignCenter);
+    mainVbLay -> addLayout(buttonsHbLay);
+    mainVbLay -> addWidget(imgLabel, 0, Qt::AlignCenter);
+    mainVbLay -> addWidget(progBar, 0, Qt::AlignCenter);
+    mainVbLay -> addStretch();
+    mainVbLay -> setSizeConstraint(QLayout::SetFixedSize);
+
+    setLayout(mainVbLay);
+
+    setWindowFlags(windowFlags() ^ Qt::WindowMaximizeButtonHint);
 }
 
-void MainWidget::OpenOptions() //funcție slot care se apelează la apăsarea butonului de opțiuni și creează obiectul ferestrei respective
+void MainWidget::OpenOptions()
 {
     OptionsWidget* optionsWindow;
-    optionsWindow = new OptionsWidget( this, showProgbar, showInfo, isNormalized, saveImg ); //trasmite opțiunile curente în parametri
+    optionsWindow = new OptionsWidget(this, showProgbar, showInfo, isNormalized, saveImg);
     optionsWindow -> show();
     
-    //mută fereastra în centrul cele principale
     QPoint position = pos();
-    position.setX( position.x() + width() / 2 - ( optionsWindow -> width() ) / 2 );
-    position.setY( position.y() + height() / 2 - ( optionsWindow -> height() ) / 2 );
+    position.setX(position.x() + width()  / 2 - ( optionsWindow -> width()  ) / 2 );
+    position.setY(position.y() + height() / 2 - ( optionsWindow -> height() ) / 2 );
 
     optionsWindow -> move( position );
 
-    setEnabled( false ); //dezactivează interacțiunea cu fereastra principală
+    setEnabled( false );
 }
 
-QRgb MainWidget::Iterate( const double &a, const double &b )//funcția de iterare propriu-zisă, primește coordonate absolute în spațiul numerelor complexe și returnează o culoare din gradientul alb negru în funcție de numărul de iterări efectuate față de cel maxim
+QRgb MainWidget::Iterate(const double &xCoord, const double &yCoord)
 {
-    double x = a, y = b;
-    for ( int i = 1; i <= maxIterations; i ++ )
+    double x = xCoord, y = yCoord;
+    for(int i = 1; i <= maxIterations; i ++)
     {
-        if ( x * x + y * y > 4 )
+        if(x * x + y * y > 4)
         {
-            int shade = 255 * ( maxIterations - i + 1 ) / maxIterations;
-            return qRgb ( shade, shade, shade );
+            int shade = 255 * (maxIterations - i + 1) / maxIterations;
+            return qRgb(shade, shade, shade);
         }
-        double xt = x * x - y * y + a;
-        double yt = 2 * x * y + b;
+        double xt = x * x - y * y + xCoord;
+        double yt = 2 * x * y + yCoord;
         x = xt;
         y = yt;
     }
-    return qRgb( 0, 0, 0 );
+    return qRgb(0, 0, 0);
 }
 
-void MainWidget::BuildMandelbrot() //funcția în care începe construirea fractalului
+void MainWidget::BuildMandelbrot()
 {
-    for ( int i = 0; i < 600; i ++ )    //trece prin fiecare pixel din fereastră
+    for(int i = 0; i < 600; i ++ )
     {
-        if ( showProgbar && ( i + 1 ) % 10 == 0 ) //actualizează bara de progres dacă e cazul
+        if ( showProgbar && ( i + 1 ) % 10 == 0 )
             progBar -> setValue( i );
         for ( int j = 0; j < 600; j ++ )
         {
             QPoint p( i, j );
-            QPointF pF = GraphCoord( p );   //obține coordonatele lui absolute
+            QPointF pF = pixelCoordsToGraphCoords( p );
             double x = pF.x(), y = pF.y();
-            image -> setPixel( p, Iterate( x, y ) );    //iterează pentru a obține culoarea lui
+            image -> setPixel( p, Iterate( x, y ) );
         }
     }
 
-    if( isNormalized )      //aplicarea normalizării dacă e cazul
+    if(isNormalized)
         Normalize();
-    UpdatePixmap();         //actualizează imaginea
-    if ( showInfo )
-        UpdateInfoLabel();  //actualizează  textul informativ dacă e cazul
-    if( saveImg )           //salvează imaginea în folderul aplicației dacă e cazul
+    UpdatePixmap();
+    if (showInfo)
+        UpdateInfoLabel();
+    if(saveImg)
     {
-        QPixmap pixmap = QPixmap::fromImage( *image );
-        pixmap.save( "image.jpg", 0, 90); 
+        QPixmap pixmap = QPixmap::fromImage(*image);
+        pixmap.save("image.jpg", 0, 90);
     }
 }
 
-void MainWidget::ZoomOut()  //funcția de zoom out, scade zoomFactor în funcție de zoomStep și reconstruiește
+void MainWidget::ZoomOut()
 {
     zoomFactor /= zoomStep;
     BuildMandelbrot();
 }
 
-void MainWidget::Reset() //resetează pozitia și numărul de iterații la valorile implicite și reconstruiește fractalul
+void MainWidget::Reset()
 {
     xOrigin = yOrigin = 0;
     zoomFactor = 1;
@@ -280,21 +281,21 @@ void MainWidget::Reset() //resetează pozitia și numărul de iterații la valor
     BuildMandelbrot();
 }
 
-void MainWidget::ToggleInfo() //funcție slot apelată la comutarea butonului pentru afișarea informațiilor
+void MainWidget::ToggleInfo()
 {
     showInfo = !showInfo;
-    if( showInfo )
+    if(showInfo)
     {
-        infoLabel = new QLabel( this );
-        infoLabel2 = new QLabel( this );
-        vbLay -> insertWidget( 0, infoLabel, 0, Qt::AlignCenter );
-        vbLay -> insertWidget( 1, infoLabel2, 0, Qt::AlignCenter );
+        zoomInfoLabel   = new QLabel(this);
+        posInfoLabel  = new QLabel(this);
+        mainVbLay -> insertWidget(0, zoomInfoLabel,  0, Qt::AlignCenter);
+        mainVbLay -> insertWidget(1, posInfoLabel, 0, Qt::AlignCenter);
         UpdateInfoLabel();
     }
     else
     {
-        delete infoLabel;
-        delete infoLabel2;
+        delete zoomInfoLabel;
+        delete posInfoLabel;
     }
 }
 
@@ -303,39 +304,38 @@ void MainWidget::ToggleSave()
     saveImg = !saveImg;
 }
 
-void MainWidget::ToggleProgBar() //funcție slot apelată la comutarea butonului pentru afișarea barei de progres
+void MainWidget::ToggleProgBar()
 {
     showProgbar = !showProgbar;
-    if( showProgbar )
+    if(showProgbar)
     {
-        progBar = new QProgressBar( this );
-        progBar -> setRange( 0, 599 );
-        progBar -> setTextVisible( false );
-        progBar -> setFixedWidth( 600 );
-        vbLay -> addWidget( progBar, 0, Qt::AlignCenter );
+        progBar = new QProgressBar(this);
+        progBar -> setRange(0, 599);
+        progBar -> setTextVisible(false);
+        progBar -> setFixedWidth(600);
+        mainVbLay -> addWidget(progBar, 0, Qt::AlignCenter);
     }
     else
         delete progBar;
 }
 
-void MainWidget::ToggleNormalization()  //funcție slot pentru comutarea normalizării, reconstruiește fractalul după aceasta
+void MainWidget::ToggleNormalization()
 {
     isNormalized = !isNormalized;
     BuildMandelbrot();
 }
 
-void MainWidget::Normalize() //funcția de normalizare, extinde contrastul imaginii pentru a ocupa tot gradientul de la alb la negru
+void MainWidget::Normalize()
 {
     int minCol = 300, maxCol = 0, val;
-    QRgb pixeldata;
+    QRgb pixelData;
     QColor color;
-    
-    //găsește valorile minim și maxim
+
     for ( int i = 0; i < image -> height(); i ++ )
         for ( int j = 0; j < image -> width(); j ++ )
         {
-            pixeldata = image -> pixel( i,j );
-            color.setRgb( pixeldata );
+            pixelData = image -> pixel( i,j );
+            color.setRgb( pixelData );
             val = color.red();
             minCol = std::min( minCol, val );
             maxCol = std::max( maxCol, val );
@@ -345,30 +345,27 @@ void MainWidget::Normalize() //funcția de normalizare, extinde contrastul imagi
         for ( int i = 0; i < image -> height(); i ++ )
             for ( int j = 0; j < image -> width(); j ++ )
             {
-                pixeldata = image -> pixel( i,j );
-                color.setRgb( pixeldata );
+                pixelData = image -> pixel( i,j );
+                color.setRgb( pixelData );
                 val = color.red();
 
                 val = ( ( val - minCol ) * 255 ) / ( maxCol - minCol );
 
                 image -> setPixel( i, j, qRgb( val, val, val ) );
             }
-    //dacă există o singură culoare face totul gri
     else
         for ( int i = 0; i < image -> height(); i ++ )
             for ( int j = 0; j < image -> width(); j ++ )
                 image -> setPixel( i, j, qRgb( 127, 127, 127 ) );
 }
 
-//constructor
 MainWidget::MainWidget( QWidget *parent ) :
     QWidget(parent)
 {
-    BuildUi(); //construiește interfața
-    BuildMandelbrot(); //contruiește prima dată fractalul
-    imgLabel -> installEventFilter( this ); //intalează filtrul de evenimente pe imgLabel
-    
-    //semnalele de la cele 2 butoane la sloturile corespunzătoare
-    connect( pushReset, SIGNAL( clicked() ), this, SLOT( Reset() ) );
-    connect( pushOptions, SIGNAL( clicked() ), this, SLOT( OpenOptions() ) );
+    BuildUi();
+    BuildMandelbrot();
+    imgLabel -> installEventFilter(this);
+
+    connect(pushReset,   SIGNAL(clicked()), this, SLOT(Reset()));
+    connect(pushOptions, SIGNAL(clicked()), this, SLOT(OpenOptions()));
 }
