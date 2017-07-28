@@ -36,93 +36,87 @@ QPointF MainWidget::pixelCoordsToGraphCoords(const QPoint &p)
     return pF;
 }
 
+void MainWidget::keyPressEvent(QKeyEvent *ev)
+{
+
+        if (ev -> key() == Qt::Key_Left)
+        {
+            double step = 1 / zoomFactor;
+            if ( ev -> modifiers() & Qt::ShiftModifier )
+                step /= 10;
+            xOrigin -= step;
+            BuildMandelbrot();
+        }
+        if(ev -> key() == Qt::Key_Right)
+        {
+            double step = 1 / zoomFactor;
+            if (ev -> modifiers() & Qt::ShiftModifier)
+                step /= 10;
+            xOrigin += step;
+            BuildMandelbrot();
+        }
+        if( ev -> key() == Qt::Key_Up)
+        {
+            double step = 1 / zoomFactor;
+            if(ev -> modifiers() & Qt::ShiftModifier)
+                step /= 10;
+            yOrigin -= step;
+            BuildMandelbrot();
+        }
+        if(ev -> key() == Qt::Key_Down)
+        {
+            double step = 1 / zoomFactor;
+            if(ev -> modifiers() & Qt::ShiftModifier)
+                step /= 10;
+            yOrigin += step;
+            BuildMandelbrot();
+        }
+        if(ev -> key() == Qt::Key_Minus)
+        {
+            if(ev -> modifiers() & Qt::ControlModifier)
+            {
+                if(maxIterations > 100)
+                    maxIterations -= 100;
+            }
+            else
+            {
+                if(ev -> modifiers() & Qt::ShiftModifier)
+                {
+                    if (maxIterations > 1)
+                        maxIterations --;
+                }
+                else
+                {
+                    if (maxIterations > 10)
+                        maxIterations -= 10;
+                }
+            }
+            BuildMandelbrot();
+        }
+
+        if(ev -> key() == Qt::Key_Plus)
+        {
+            if(ev -> modifiers() & Qt::ControlModifier)
+                 maxIterations += 100;
+            else
+            {
+                if(ev -> modifiers() & Qt::ShiftModifier)
+                    maxIterations ++;
+                else
+                    maxIterations += 10;
+            }
+            BuildMandelbrot();
+        }
+
+}
+
 bool MainWidget::eventFilter(QObject *obj, QEvent *event)
 {
-    imgLabel -> setFocus(); //TODO: fix crash here
+    //imgLabel -> setFocus(); //TODO: fix crash here
 
     if(obj == this -> imgLabel)
     {
-        if(event -> type() == QEvent::KeyPress)
-        {
-            QKeyEvent* ev = static_cast<QKeyEvent*>(event);
-
-            if (ev -> key() == Qt::Key_Left)
-            {
-                double step = 1 / zoomFactor;
-                if ( ev -> modifiers() & Qt::ShiftModifier )
-                    step /= 10;
-                xOrigin -= step;
-                BuildMandelbrot();
-                return true;
-            }
-            if(ev -> key() == Qt::Key_Right)
-            {
-                double step = 1 / zoomFactor;
-                if (ev -> modifiers() & Qt::ShiftModifier)
-                    step /= 10;
-                xOrigin += step;
-                BuildMandelbrot();
-                return true;
-            }
-            if( ev -> key() == Qt::Key_Up)
-            {
-                double step = 1 / zoomFactor;
-                if(ev -> modifiers() & Qt::ShiftModifier)
-                    step /= 10;
-                yOrigin -= step;
-                BuildMandelbrot();
-                return true;
-            }
-            if(ev -> key() == Qt::Key_Down)
-            {
-                double step = 1 / zoomFactor;
-                if(ev -> modifiers() & Qt::ShiftModifier)
-                    step /= 10;
-                yOrigin += step;
-                BuildMandelbrot();
-                return true;
-            }
-            if(ev -> key() == Qt::Key_Minus)
-            {
-                if(ev -> modifiers() & Qt::ControlModifier)
-                {
-                    if(maxIterations > 100)
-                        maxIterations -= 100;
-                }
-                else
-                {
-                    if(ev -> modifiers() & Qt::ShiftModifier)
-                    {
-                        if (maxIterations > 1)
-                            maxIterations --;
-                    }
-                    else
-                    {
-                        if (maxIterations > 10)
-                            maxIterations -= 10;
-                    }
-                }
-                BuildMandelbrot();
-                return true;
-            }
-
-            if(ev -> key() == Qt::Key_Plus)
-            {
-                if(ev -> modifiers() & Qt::ControlModifier)
-                     maxIterations += 100;
-                else
-                {
-                    if(ev -> modifiers() & Qt::ShiftModifier)
-                        maxIterations ++;
-                    else
-                        maxIterations += 10;
-                }
-                BuildMandelbrot();
-                return true;
-            }
-        }
-
-        if(event -> type() == QEvent::MouseButtonRelease)
+       if(event -> type() == QEvent::MouseButtonRelease)
         {
             if(isEnabled())
             {

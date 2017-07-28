@@ -10,7 +10,7 @@ class QImage;
 class QPushButton;
 class QProgressBar;
 
-class MainWidget : public QWidget //fereastra principală
+class MainWidget : public QWidget
 {
     Q_OBJECT
 
@@ -41,6 +41,7 @@ public slots:
 
 protected:
     bool eventFilter(QObject*, QEvent*);
+    void keyPressEvent(QKeyEvent*);
 
 private:
     QVBoxLayout* mainVbLay;
