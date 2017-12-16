@@ -13,7 +13,7 @@ class OptionsWidget : public QWidget
 {
     Q_OBJECT
 public:
-    OptionsWidget( MainWidget* parent = 0, bool progbar = false, bool info = false, bool norm = false, bool save = false );
+    OptionsWidget( MainWidget* parent = 0, bool info = false, bool norm = false, bool save = false );
 
     void BuildUi();
     void closeEvent( QCloseEvent* event );
@@ -25,7 +25,9 @@ public slots:
 private:
     QVBoxLayout* vbLay;
     QLabel* instLabel;
-    QCheckBox* normCbox, * progbarCBox, * infoCBox, * saveCbox;
+    QCheckBox* normCbox;
+    QCheckBox* infoCBox;
+    QCheckBox* saveCbox;
     QFrame* separator;
     MainWidget* parentWindow;
 

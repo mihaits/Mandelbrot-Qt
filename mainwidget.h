@@ -8,7 +8,6 @@ class QVBoxLayout;
 class QHBoxLayout;
 class QImage;
 class QPushButton;
-class QProgressBar;
 
 class MainWidget : public QWidget
 {
@@ -36,7 +35,6 @@ public slots:
     void OpenOptions();
     void ToggleInfo();
     void ToggleSave();
-    void ToggleProgBar();
     void ToggleNormalization();
 
 protected:
@@ -50,11 +48,9 @@ private:
     QPushButton* pushReset, * pushOptions;
     QLabel* imgLabel;
     QLabel* zoomInfoLabel, * posInfoLabel;
-    QProgressBar* progBar;
-    bool showProgbar = true;
-    bool showInfo = true;
     bool isNormalized = false;
     bool saveImg = false;
+    bool showInfo = true;
 
     double zoomFactor = 1;
     double xOrigin = 0;

@@ -172,16 +172,11 @@ void MainWidget::BuildUi()
     pushOptions     = new QPushButton(this);
     imgLabel        = new QLabel(this);
     image           = new QImage(600, 600, QImage::Format_RGB32);
-    progBar         = new QProgressBar(this);
 
     imgLabel    -> setPixmap(QPixmap::fromImage(*image));
     pushReset   -> setText("Reset");
     pushReset   -> setFixedWidth(100);
     pushOptions -> setText("Options and Instructions");
-    pushOptions -> setFixedWidth(150);
-    progBar     -> setRange(0, 599);
-    progBar     -> setTextVisible(false);
-    progBar     -> setFixedWidth(600);
     
     buttonsHbLay -> addStretch();
     buttonsHbLay -> addWidget(pushOptions);
@@ -192,7 +187,6 @@ void MainWidget::BuildUi()
     mainVbLay -> addWidget(posInfoLabel, 0, Qt::AlignCenter);
     mainVbLay -> addLayout(buttonsHbLay);
     mainVbLay -> addWidget(imgLabel, 0, Qt::AlignCenter);
-    mainVbLay -> addWidget(progBar, 0, Qt::AlignCenter);
     mainVbLay -> addStretch();
     mainVbLay -> setSizeConstraint(QLayout::SetFixedSize);
 
@@ -204,7 +198,7 @@ void MainWidget::BuildUi()
 void MainWidget::OpenOptions()
 {
     OptionsWidget* optionsWindow;
-    optionsWindow = new OptionsWidget(this, showProgbar, showInfo, isNormalized, saveImg);
+    optionsWindow = new OptionsWidget(this, showInfo, isNormalized, saveImg);
     optionsWindow -> show();
     
     QPoint position = pos();
@@ -238,8 +232,6 @@ void MainWidget::BuildMandelbrot()
 {
     for(int i = 0; i < 600; i ++ )
     {
-        if ( showProgbar && ( i + 1 ) % 10 == 0 )
-            progBar -> setValue( i );
         for ( int j = 0; j < 600; j ++ )
         {
             QPoint p( i, j );
@@ -296,21 +288,6 @@ void MainWidget::ToggleInfo()
 void MainWidget::ToggleSave() 
 {
     saveImg = !saveImg;
-}
-
-void MainWidget::ToggleProgBar()
-{
-    showProgbar = !showProgbar;
-    if(showProgbar)
-    {
-        progBar = new QProgressBar(this);
-        progBar -> setRange(0, 599);
-        progBar -> setTextVisible(false);
-        progBar -> setFixedWidth(600);
-        mainVbLay -> addWidget(progBar, 0, Qt::AlignCenter);
-    }
-    else
-        delete progBar;
 }
 
 void MainWidget::ToggleNormalization()

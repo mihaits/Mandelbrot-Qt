@@ -7,7 +7,6 @@
 void OptionsWidget::BuildUi()
 {
     instLabel   = new QLabel(this);
-    progbarCBox = new QCheckBox(this);
     infoCBox    = new QCheckBox(this);
     normCbox    = new QCheckBox(this);
     saveCbox    = new QCheckBox(this);
@@ -20,7 +19,6 @@ void OptionsWidget::BuildUi()
                            "Use plus and minus keys to change the number of iterations.\n"
                            "Hold Shift for small increments or Control for large increments.");
     normCbox    -> setText("Normalize color");
-    progbarCBox -> setText("Show build progress bar");
     infoCBox    -> setText("Show view info");
     saveCbox    -> setText("Automatically save image in application folder");
     separator   -> setFrameShape(QFrame::HLine);
@@ -28,7 +26,6 @@ void OptionsWidget::BuildUi()
 
     vbLay -> addWidget(instLabel);
     vbLay -> addWidget(separator);
-    vbLay -> addWidget(progbarCBox);
     vbLay -> addWidget(infoCBox);
     vbLay -> addWidget(normCbox);
     vbLay -> addWidget(saveCbox);
@@ -43,14 +40,12 @@ void OptionsWidget::closeEvent(QCloseEvent* event)
     parentWindow -> setEnabled(true);
 }
 
-OptionsWidget::OptionsWidget(MainWidget* parent, bool progBar, bool info, bool norm, bool save) : QWidget()
+OptionsWidget::OptionsWidget(MainWidget* parent, bool info, bool norm, bool save) : QWidget()
 {
     parentWindow = parent;
 
     BuildUi();
 
-    if(progBar)
-        progbarCBox -> setCheckState(Qt::Checked);
     if(info)
         infoCBox    -> setCheckState(Qt::Checked);
     if(norm)
@@ -60,6 +55,5 @@ OptionsWidget::OptionsWidget(MainWidget* parent, bool progBar, bool info, bool n
 
     connect(infoCBox,       SIGNAL(clicked()), parent, SLOT(ToggleInfo()));
     connect(saveCbox,       SIGNAL(clicked()), parent, SLOT(ToggleSave()));
-    connect(progbarCBox,    SIGNAL(clicked()), parent, SLOT(ToggleProgBar()));
     connect(normCbox,       SIGNAL(clicked()), parent, SLOT(ToggleNormalization()));
 }
