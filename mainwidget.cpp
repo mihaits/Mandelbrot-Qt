@@ -213,11 +213,11 @@ void MainWidget::OpenOptions()
 QRgb MainWidget::Iterate(const double &xCoord, const double &yCoord)
 {
     double x = xCoord, y = yCoord;
-    for(int i = 1; i <= maxIterations; i ++)
+    for(int i = 0; i < maxIterations; ++ i)
     {
         if(x * x + y * y > 4)
         {
-            int shade = 255 * (maxIterations - i + 1) / maxIterations;
+            int shade = 255 * (maxIterations - i) / maxIterations;
             return qRgb(shade, shade, shade);
         }
         double xt = x * x - y * y + xCoord;
@@ -227,6 +227,8 @@ QRgb MainWidget::Iterate(const double &xCoord, const double &yCoord)
     }
     return qRgb(0, 0, 0);
 }
+
+
 
 void MainWidget::BuildMandelbrot()
 {
