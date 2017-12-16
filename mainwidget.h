@@ -51,9 +51,16 @@ private:
     QLabel* imgLabel;
     QLabel* zoomInfoLabel, * posInfoLabel;
     QProgressBar* progBar;
-    bool showProgbar = true, showInfo = true, isNormalized = false, saveImg = false;
+    bool showProgbar = true;
+    bool showInfo = true;
+    bool isNormalized = false;
+    bool saveImg = false;
 
-    double zoomFactor = 1, xOrigin = 0, yOrigin = 0, zoomStep = 1.5, moveStep = 1;
+    double zoomFactor = 1;
+    double xOrigin = 0;
+    double yOrigin = 0;
+    double zoomStep = 1.5;
+    double moveStep = 1;
     int maxIterations = 50;
 
 };
