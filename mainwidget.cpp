@@ -24,18 +24,6 @@ void MainWidget::ZoomIn(const QPoint &p)  {
     BuildMandelbrot();
 }
 
-QPointF MainWidget::pixelCoordsToGraphCoords(const QPoint &p)
-{
-    double viewSize = (1 / zoomFactor) * 4;
-    double xRatio = (double)p.x() / 600;
-    double yRatio = (double)p.y() / 600;
-    QPointF pF;
-    pF.setX(xOrigin - viewSize / 2 + viewSize * xRatio);
-    pF.setY(yOrigin - viewSize / 2 + viewSize * yRatio);
-
-    return pF;
-}
-
 void MainWidget::keyPressEvent(QKeyEvent *ev)
 {
 
@@ -210,38 +198,49 @@ void MainWidget::OpenOptions()
     setEnabled( false );
 }
 
-QRgb MainWidget::Iterate(const double &xCoord, const double &yCoord)
-{
-    double x = xCoord, y = yCoord;
-    for(int i = 0; i < maxIterations; ++ i)
-    {
-        if(x * x + y * y > 4)
+int* iterate(int maxIterations, double xOrigin, double yOrigin, double zoomFactor) {
+    auto result = new int[600*600];
+
+    for(int p = 0; p < 360000; ++ p) {
+        // deliniarize
+        int i = p / 600;
+        int j = p % 600;
+
+        // convert to complex number
+        double cx = xOrigin - (2 / zoomFactor) * (1 - 2 * ((double) i / 600));
+        double cy = yOrigin - (2 / zoomFactor) * (1 - 2 * ((double) j / 600));
+
+        // do the iterations
+        double zx = cx;
+        double zy = cy;
+        double tx;
+        double ty;
+        bool inMandelbrot = true;
+        for(int k = 0; k < maxIterations; ++ k)
         {
-            int shade = 255 * (maxIterations - i) / maxIterations;
-            return qRgb(shade, shade, shade);
+            if(zx * zx + zy * zy > 4) {
+                result[i*600+j] = 255 * (1 - (double) k / maxIterations);
+                inMandelbrot = false;
+                break;
+            }
+            tx = zx * zx - zy * zy + cx;
+            ty = 2 * zx * zy + cy;
+            zx = tx;
+            zy = ty;
         }
-        double xt = x * x - y * y + xCoord;
-        double yt = 2 * x * y + yCoord;
-        x = xt;
-        y = yt;
+        if(inMandelbrot)
+            result[i*600+j] = 0;
     }
-    return qRgb(0, 0, 0);
+
+    return result;
 }
-
-
 
 void MainWidget::BuildMandelbrot()
 {
-    for(int i = 0; i < 600; i ++ )
-    {
-        for ( int j = 0; j < 600; j ++ )
-        {
-            QPoint p( i, j );
-            QPointF pF = pixelCoordsToGraphCoords( p );
-            double x = pF.x(), y = pF.y();
-            image -> setPixel( p, Iterate( x, y ) );
-        }
-    }
+    auto v = iterate(maxIterations, xOrigin, yOrigin, zoomFactor);
+    for(int p = 0; p < 600*600; ++ p)
+            image -> setPixelColor(p / 600, p % 600, QColor(v[p], v[p], v[p]));
+    delete[] v;
 
     if(isNormalized)
         Normalize();
