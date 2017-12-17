@@ -15,9 +15,8 @@
 #include <math.h>
 
 void MainWidget::ZoomIn(const QPoint &p)  {
-    QPointF pF = pixelCoordsToGraphCoords( p );
-    double x = pF.x();
-    double y = pF.y();
+    double x = xOrigin - (2 / zoomFactor) * (1 - 2 * ((double) p.x() / 600));
+    double y = yOrigin - (2 / zoomFactor) * (1 - 2 * ((double) p.y() / 600));
     xOrigin = x - ( x - xOrigin ) / zoomStep;
     yOrigin = y - ( y - yOrigin ) / zoomStep;
     zoomFactor *= zoomStep;
@@ -239,7 +238,7 @@ void MainWidget::BuildMandelbrot()
 {
     auto v = iterate(maxIterations, xOrigin, yOrigin, zoomFactor);
     for(int p = 0; p < 600*600; ++ p)
-            image -> setPixelColor(p / 600, p % 600, QColor(v[p], v[p], v[p]));
+            image -> setPixel(p / 600, p % 600, qRgb(v[p], v[p], v[p]));
     delete[] v;
 
     if(isNormalized)

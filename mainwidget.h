@@ -19,9 +19,7 @@ public:
     void BuildUi();
     void UpdatePixmap();
 
-    QPointF pixelCoordsToGraphCoords( const QPoint& );
     void BuildMandelbrot();
-    QRgb Iterate( const double&, const double& );
     void UpdateInfoLabel();
 
     void ZoomIn( const QPoint& );
