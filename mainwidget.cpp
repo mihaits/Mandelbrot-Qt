@@ -197,46 +197,12 @@ void MainWidget::OpenOptions()
     setEnabled( false );
 }
 
-int* iterate(int maxIterations, double xOrigin, double yOrigin, double zoomFactor) {
-    auto result = new int[600*600];
-
-    for(int p = 0; p < 360000; ++ p) {
-        // deliniarize
-        int i = p / 600;
-        int j = p % 600;
-
-        // convert to complex number
-        double cx = xOrigin - (2 / zoomFactor) * (1 - 2 * ((double) i / 600));
-        double cy = yOrigin - (2 / zoomFactor) * (1 - 2 * ((double) j / 600));
-
-        // do the iterations
-        double zx = cx;
-        double zy = cy;
-        double tx;
-        double ty;
-        bool inMandelbrot = true;
-        for(int k = 0; k < maxIterations; ++ k)
-        {
-            if(zx * zx + zy * zy > 4) {
-                result[i*600+j] = 255 * (1 - (double) k / maxIterations);
-                inMandelbrot = false;
-                break;
-            }
-            tx = zx * zx - zy * zy + cx;
-            ty = 2 * zx * zy + cy;
-            zx = tx;
-            zy = ty;
-        }
-        if(inMandelbrot)
-            result[i*600+j] = 0;
-    }
-
-    return result;
-}
+extern "C"
+int* iterateGPU(int maxIterations, double xOrigin, double yOrigin, double zoomFactor);
 
 void MainWidget::BuildMandelbrot()
 {
-    auto v = iterate(maxIterations, xOrigin, yOrigin, zoomFactor);
+    auto v = iterateGPU(maxIterations, xOrigin, yOrigin, zoomFactor);
     for(int p = 0; p < 600*600; ++ p)
             image -> setPixel(p / 600, p % 600, qRgb(v[p], v[p], v[p]));
     delete[] v;
