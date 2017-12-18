@@ -46,9 +46,13 @@ private:
     QPushButton* pushReset, * pushOptions;
     QLabel* imgLabel;
     QLabel* zoomInfoLabel, * posInfoLabel;
+
     bool isNormalized = false;
     bool saveImg = false;
     bool showInfo = true;
+
+    int imageWidth = 600;
+    int imageHeight = 600;
 
     double zoomFactor = 1;
     double xOrigin = 0;

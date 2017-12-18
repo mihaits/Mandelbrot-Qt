@@ -11,12 +11,12 @@
 #include <QProgressBar>
 #include <QMessageBox>
 #include <QLayoutItem>
-#include <Qlabel>
+#include <QLabel>
 #include <math.h>
 
 void MainWidget::ZoomIn(const QPoint &p)  {
-    double x = xOrigin - (2 / zoomFactor) * (1 - 2 * ((double) p.x() / 600));
-    double y = yOrigin - (2 / zoomFactor) * (1 - 2 * ((double) p.y() / 600));
+    double x = xOrigin - (2 / zoomFactor) * (1 - 2 * ((double) p.x() / imageWidth));
+    double y = yOrigin - (2 / zoomFactor) * (1 - 2 * (((double) p.y() + (imageWidth - imageHeight) / 2) / imageWidth));
     xOrigin = x - ( x - xOrigin ) / zoomStep;
     yOrigin = y - ( y - yOrigin ) / zoomStep;
     zoomFactor *= zoomStep;
@@ -99,7 +99,7 @@ void MainWidget::keyPressEvent(QKeyEvent *ev)
 
 bool MainWidget::eventFilter(QObject *obj, QEvent *event)
 {
-    //imgLabel -> setFocus(); //TODO: fix crash here
+    // imgLabel -> setFocus(); //TODO: fix crash here
 
     if(obj == this -> imgLabel)
     {
@@ -158,7 +158,7 @@ void MainWidget::BuildUi()
     pushReset       = new QPushButton(this);
     pushOptions     = new QPushButton(this);
     imgLabel        = new QLabel(this);
-    image           = new QImage(600, 600, QImage::Format_RGB32);
+    image           = new QImage(imageWidth, imageHeight, QImage::Format_RGB32);
 
     imgLabel    -> setPixmap(QPixmap::fromImage(*image));
     pushReset   -> setText("Reset");
@@ -198,13 +198,16 @@ void MainWidget::OpenOptions()
 }
 
 extern "C"
-int* iterateGPU(int maxIterations, double xOrigin, double yOrigin, double zoomFactor);
+int* iterateGPU(int w, int h, int maxIterations, double xOrigin, double yOrigin, double zoomFactor);
 
 void MainWidget::BuildMandelbrot()
 {
-    auto v = iterateGPU(maxIterations, xOrigin, yOrigin, zoomFactor);
-    for(int p = 0; p < 600*600; ++ p)
-            image -> setPixel(p / 600, p % 600, qRgb(v[p], v[p], v[p]));
+    auto v = iterateGPU(imageWidth, imageHeight, maxIterations, xOrigin, yOrigin, zoomFactor);
+    for(int p = 0; p < imageWidth * imageHeight; ++ p)
+    {
+        // std::cout << "i = " << p / imageWidth << " " << p % imageWidth << "\n";
+        image -> setPixel(p % imageWidth, p / imageWidth, qRgb(v[p], v[p], v[p]));
+    }
     delete[] v;
 
     if(isNormalized)
@@ -268,8 +271,8 @@ void MainWidget::Normalize()
     QRgb pixelData;
     QColor color;
 
-    for ( int i = 0; i < image -> height(); i ++ )
-        for ( int j = 0; j < image -> width(); j ++ )
+    for ( int i = 0; i < imageWidth; i ++ )
+        for ( int j = 0; j < imageHeight; j ++ )
         {
             pixelData = image -> pixel( i,j );
             color.setRgb( pixelData );
@@ -279,8 +282,8 @@ void MainWidget::Normalize()
         }
     
     if( minCol != maxCol ) 
-        for ( int i = 0; i < image -> height(); i ++ )
-            for ( int j = 0; j < image -> width(); j ++ )
+        for ( int i = 0; i < imageWidth; i ++ )
+            for ( int j = 0; j < imageHeight; j ++ )
             {
                 pixelData = image -> pixel( i,j );
                 color.setRgb( pixelData );
@@ -291,8 +294,8 @@ void MainWidget::Normalize()
                 image -> setPixel( i, j, qRgb( val, val, val ) );
             }
     else
-        for ( int i = 0; i < image -> height(); i ++ )
-            for ( int j = 0; j < image -> width(); j ++ )
+        for ( int i = 0; i < imageWidth; i ++ )
+            for ( int j = 0; j < imageHeight; j ++ )
                 image -> setPixel( i, j, qRgb( 127, 127, 127 ) );
 }
 
